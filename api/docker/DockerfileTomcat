@@ -1,0 +1,15 @@
+FROM tomcat:8
+
+COPY application.properties /usr/local/tomcat/conf/application.properties
+
+COPY ROOT.xml /usr/local/tomcat/conf/Catalina/localhost/ROOT.xml
+
+VOLUME /usr/local/tomcat/webapps
+
+ENV JPDA_ADDRESS="5005"
+ENV JPDA_TRANSPORT="dt_socket"
+
+ENTRYPOINT ["catalina.sh", "jpda", "run"]
+
+EXPOSE 8888
+EXPOSE 5006

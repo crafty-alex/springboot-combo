@@ -1,0 +1,107 @@
+.attestation {
+  background-color: #082188;
+  border: none;
+  color: white;
+  padding: 10px 24px;
+  text-align: center;
+  text-decoration: none;
+  display: inline-block;
+  font-size: 15px;
+  margin: 4px 2px;
+  cursor: pointer;
+}
+
+.attestation:hover {
+  color: white;
+  text-decoration: none;
+}
+
+.attestation:focus {
+  color: white;
+  text-decoration: none;
+}
+
+.divider {
+  margin: 0 auto;
+  padding: 0;
+  border-color: #33aeff;
+  width: 97%;
+}
+
+.panel-title {
+  font-weight: bold;
+}
+
+.panel-body {
+  line-height: 200%;
+  overflow-x: auto;
+}
+
+.button {
+  margin: 20px;
+}
+
+.buttons-demande {
+  float: right;
+  margin-left: 30px;
+  margin-bottom: 10px;
+  padding-right: 60px;
+  padding-left: 60px;
+  font-size: larger;
+}
+
+.button-pj {
+  float: right;
+  margin-right: 10px;
+  margin-top: 20px;
+}
+
+.button-pj-modal {
+  float: right;
+  margin-left: 15px;
+}
+
+.buttons-refus {
+  float: right;
+  margin-left: 30px;
+  margin-bottom: 10px;
+  margin-top: 30px;
+  padding-right: 60px;
+  padding-left: 60px;
+  font-size: larger;
+}
+
+.buttons-refus-colonne {
+  padding-right: 40px;
+}
+
+.panel-default {
+  border-color: #082188;
+}
+
+.equal {
+  display: flex;
+  display: -webkit-flex;
+  flex-wrap: wrap;
+}
+
+.col-equal {
+  margin-bottom: 20px;
+}
+
+.panel {
+  height: 100%;
+}
+
+.voie {
+  padding: 0px;
+}
+
+.identitePersonne {
+  padding-left: 0px;
+}
+
+.customModalAttestations {
+  max-width: 300px;
+  width: 100%;
+}

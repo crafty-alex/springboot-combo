@@ -1,0 +1,30 @@
+version: "3.6"
+services:
+  db:
+    image: postgres-alex
+    build:
+      context: ./
+      dockerfile: DockerfilePostgres
+    ports:
+      - "5433:5432"
+    volumes:
+      - dicem-postgres-volume:/var/lib/postgresql/data
+  tomcat:
+    restart: on-failure:10
+    image: tomcat-alex
+    build:
+      context: ./
+      dockerfile: DockerfileTomcat
+    ports:
+      - "8888:8080"
+      - "5006:5005"
+    volumes:
+      - ".\\tomcat:/usr/local/tomcat/webapps"
+      - "C:\\alex-docker\\logs:/var/log"
+    depends_on:
+      - db
+
+volumes:
+
+  dicem-postgres-volume:
+

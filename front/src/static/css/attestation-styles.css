@@ -1,0 +1,21 @@
+ol.attest-list {
+  list-style-type: none;
+  counter-reset: elementcounter;
+  padding-left: 15px;
+  padding-top: 10px;
+}
+
+li.attest-list-item::before {
+  content: "Attestation n\00BA "counter(elementcounter) " : ";
+  counter-increment: elementcounter;
+  font-weight: bold;
+}
+
+li.attest-list-item {
+  margin-bottom: 10px;
+  margin-top: 5px;
+}
+
+a.zip {
+  padding-left: 15px;
+}

@@ -1,0 +1,15 @@
+ol.pj-list {
+  list-style-type: none;
+  counter-reset: elementcounter;
+  padding-left: 0;
+}
+
+li.pj-list-item::before {
+  content: "Pi\00E8 ce n\00BA "counter(elementcounter) " : ";
+  counter-increment: elementcounter;
+  font-weight: bold;
+}
+
+li.pj-list-item {
+  margin-bottom: 10px;
+}

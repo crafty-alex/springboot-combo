@@ -1,0 +1,41 @@
+.-pageSizeOptions {
+  display: none;
+}
+
+.rt-tr-group {
+  background: #f8f8f8;
+}
+
+.rt-tr-group:nth-of-type(even) {
+  background: #e4e6ea;
+}
+
+.ReactTable .rt-tbody .rt-td {
+  border-right: 1px solid #cacbcf;
+}
+
+.buttonNext {
+  text-align: right;
+}
+
+.buttonPrevious {
+  text-align: left;
+}
+
+.pagination {
+  text-align: center;
+  margin-top: 0;
+  margin-bottom: 0;
+  padding-left: 15px;
+}
+
+.buttonSearchedResults {
+  margin-bottom: 20px;
+  margin-top: 20px;
+  width: 90px;
+}
+
+.buttonPagination {
+  margin-bottom: 20px;
+  margin-top: 20px;
+}

@@ -1,0 +1,12 @@
+.panel-default.stat-accueil > .panel-heading {
+  background-color: rgba(228, 230, 234, 1);
+}
+
+.stat-accueil {
+  background-color: rgba(228, 230, 234, 1);
+  margin-top: 23px;
+}
+
+.divider.stat-accueil {
+  border-color: #082188;
+}

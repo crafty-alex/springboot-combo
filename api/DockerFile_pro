@@ -1,0 +1,19 @@
+FROM adoptopenjdk:11.0.10_9-jre-hotspot-focal
+
+LABEL   Name="alex-backend" \
+        Version="${VERSION}" \
+
+ENV TZ="Europe/Paris" \
+    LANG="fr_FR.UTF-8" \
+    LANGUAGE="fr_FR:fr" \
+    LC_ALL="fr_FR.UTF-8"
+
+ADD dsn-api-impl/target/dsn.jar /usr/local/app/ROOT.jar
+
+RUN addgroup --system dsn -gid 1001 && adduser --system dsn --gid 1001 --uid 1001
+
+USER dsn
+
+EXPOSE 8080
+
+CMD java -jar /usr/local/app/ROOT.jar ${JAVA_OPTS}

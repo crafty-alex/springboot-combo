@@ -1,0 +1,11 @@
+server:
+  port: 9595
+
+zuul:
+  routes:
+    foos:
+      path: /foos/**
+      url: http://localhost:7070/foos
+
+jwt:
+  secret: javainuse

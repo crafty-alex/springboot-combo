@@ -1,0 +1,126 @@
+.button-extraction {
+  float: right;
+  margin-right: 20px;
+}
+
+.btnExtractStats {
+  background-color: #33aeff;
+  color: white;
+  border: none;
+  margin: 7px;
+}
+
+.cell {
+  text-align: center;
+}
+
+.cell-mois {
+  background-color: #082188;
+  color: white;
+  text-align: center;
+}
+
+.cell-type {
+  text-align: right;
+}
+
+.demandes-validees {
+  background-color: #082188;
+  color: white;
+  text-align: center;
+}
+
+.demandes-rejetees {
+  background-color: #33aeff;
+  color: white;
+  text-align: center;
+}
+
+.demandes-total {
+  background-color: grey;
+  color: white;
+  text-align: center;
+}
+
+.libelle {
+  margin-bottom: 15px;
+  font-size: 1.4em;
+  font-weight: bold;
+}
+
+.ligne-mois {
+  background-color: #082188;
+  color: white;
+}
+
+.motif {
+  text-align: right;
+  font-weight: bold;
+}
+
+.stat-accueil {
+  margin-right: 20px;
+  margin-left: 15px;
+}
+
+.stat-divider {
+  margin: 0 auto;
+  padding: 0;
+  border-color: #33aeff;
+  margin-right: 5px;
+}
+
+.statut {
+  font-weight: bold;
+}
+
+.tableau {
+  font-size: 0.9em;
+  background-color: #ffffff;
+  margin: 20px;
+  width: 95%;
+}
+
+.tableau-statuts {
+  font-size: 0.9em;
+  background-color: #ffffff;
+  margin-bottom: 5px;
+}
+
+.total {
+  background-color: grey;
+  color: white;
+  text-align: right;
+}
+
+.total-cell {
+  font-weight: bold;
+  background-color: #33aeff;
+  color: white;
+  text-align: center;
+}
+
+.total-libelle {
+  font-weight: bold;
+  background-color: #33aeff;
+  color: white;
+}
+
+.total-statuts {
+  font-weight: bold;
+  background-color: #33aeff;
+  color: white;
+  text-align: center;
+}
+
+.button-extraction {
+  float: right;
+  margin-right: 20px;
+}
+
+.btnExtractStats {
+  background-color: #33aeff;
+  color: white;
+  border: none;
+  margin: 7px;
+}

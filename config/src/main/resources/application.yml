@@ -1,0 +1,20 @@
+server:
+  port: 9101
+
+spring:
+  application:
+    name: config-server
+  cloud:
+    config:
+      server:
+        git:
+          skip-ssl-validation: true
+          uri: # Github config URL
+          username: 
+          password: 
+
+
+
+# when not a git repo but just in ressources
+        #native:
+          #search-locations: classpath:config

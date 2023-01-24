@@ -1,0 +1,17 @@
+spring:
+  application:
+    name: spring-cloud-eureka-client
+  config:
+    import: optional:configserver:http://localhost:9101/
+
+
+server:
+  error:
+    include-message: always
+
+logging:
+  level:
+    org.springframework.web.filter.CommonsRequestLoggingFilter: DEBUG
+
+# SPRING_PROFILES_ACTIVE=dev in run config (environment variables)
+# http://localhost:9101/spring-cloud-eureka-client-dev/default

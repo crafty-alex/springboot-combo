@@ -1,0 +1,70 @@
+.note-date {
+  font-weight: lighter;
+}
+
+.bold-title {
+  font-weight: bold;
+}
+
+.title-margin-top {
+  margin-top: 10px;
+}
+
+.title-margin-around {
+  margin-top: 10px;
+  margin-bottom: 10px;
+}
+
+.input-motif {
+  margin-top: 8%;
+}
+
+.bloc-commentaire {
+  padding-bottom: 22px;
+  padding-right: 22px;
+  padding-left: 22px;
+}
+
+.header-commentaire {
+  margin-bottom: 15px;
+  margin-top: 30px;
+}
+
+.reponse-note {
+  font-size: small;
+  font-style: italic;
+}
+
+.nom-usager {
+  text-transform: uppercase;
+}
+
+.paper-clip {
+  display: flex;
+}
+
+.react-overlay-loader-spinner:before {
+  box-sizing: border-box;
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 40px;
+  height: 40px;
+  margin-top: -30px;
+  margin-left: -20px;
+  border-radius: 50%;
+  border: 3px solid #eee;
+  border-top-color: blue;
+  animation: react-overlay-loader-spinner 0.8s linear infinite;
+}
+
+.button-note {
+  padding-right: 60px;
+  padding-left: 60px;
+  font-size: larger;
+}
+
+.customModalNote {
+  max-width: 600px;
+  width: 100%;
+}

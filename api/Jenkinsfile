@@ -1,0 +1,265 @@
+#!groovy
+def VERSION
+
+pipeline {
+    agent { label 'docker' }
+    environment {
+        HOME = "."
+        // Noms des branches - GIT FLOW
+        MASTER_GIT_BRANCH = "master"
+        DEVELOP_GIT_BRANCH = "develop"
+        INTEGRATION_GIT_BRANCH = "integration"
+        VALID_GIT_BRANCH = "valid" 
+        FEATURE_GIT_BRANCH_GROOVY_EXPR = /feature\/.*/
+        HOTFIX_GIT_BRANCH_GROOVY_EXPR = /hotfix\/.*/
+        RELEASE_GIT_BRANCH_GROOVY_EXPR = /release\/.*/
+
+        // il est possible d'ajuster manuellement CURRENT_BRANCH pour simuler le comportement d'une autre branche
+        CURRENT_BRANCH = "${GIT_BRANCH.replaceAll('origin/', '')}"
+
+
+        GROUP_NAME = "backend-alex"
+        // PROJECT_NAME : nom de l'image docker et de la release Helm. A adapter librement à votre projet
+        PROJECT_NAME = "example"
+        // DOCKER_IMAGE_NAME : nom (et path) de l'image docker dans le Harbor
+        DOCKER_IMAGE_NAME = "ods/${GROUP_NAME}/${PROJECT_NAME}"
+        SONAR_PROJECT_NAME = "ALEX-backend-${PROJECT_NAME}"
+        // ARTIFACT_TYPE : les type d'artifact produit à mettre en stash entre les étapes du build ("jar" ou "war")
+        ARTIFACT_TYPE = "jar"
+        // IMAGE_BUILD_ARGS : arguement passés à docker lors du build de l'image docker du projet
+        IMAGE_BUILD_ARGS = "--build-arg JAR_FILE=${PROJECT_NAME}-api-impl/target/${PROJECT_NAME}.${ARTIFACT_TYPE} "
+
+        // URL du config server sur la VM
+        SPRING_CLOUD_CONFIG_URI = ""
+
+        DEPLOYMENT_CONTAINER_NAME = "${PROJECT_NAME}-${CURRENT_BRANCH}"
+        DEPLOYMENT_SERVER = ""
+        DEPLOYMENT_SERVER_USER = "centos"
+        DEPLOYMENT_PORT_DEV = "8094"
+        DEPLOYMENT_PORT_INTEGRATION = "7084"
+
+        MAIL_CHEF_PROJET = ""
+        MAIL_EQUIPE = ""
+
+        IMAGE_REGISTRY = ""
+        IMAGE_PUSH_NAME = "${IMAGE_REGISTRY}/${DOCKER_IMAGE_NAME}"
+        SONAR_URL = ""
+        SONAR_TOKEN = ""
+    }
+    parameters {
+        booleanParam(
+                defaultValue: false,
+                description: 'Skip tous tests (rest-assured, cucumber, mockito)',
+                name: 'SKIP_TEST'
+        )
+    }
+    options {
+        gitLabConnection('gitlab')
+        gitlabBuilds(builds: ['test', 'sonar', 'report'])
+    }
+    triggers {
+        gitlab(triggerOnPush: true, triggerOnMergeRequest: true, branchFilterType: 'All', pendingBuildName: 'Jenkins', cancelPendingBuildsOnUpdate: true)
+    }
+    stages {
+        stage('agent') {
+            agent {
+                docker {
+                    image ''
+                    alwaysPull true
+                    // On expose le démon docker pour testcontainers
+                    args '-v /var/run/docker.sock:/var/run/docker.sock -u jenkins:docker'
+                }
+            }
+            when {
+                not {
+                    expression { env.CURRENT_BRANCH == env.VALID_GIT_BRANCH };
+                }
+            }
+            stages {
+                // Vérification que le nom de la branche soit en accord avec notre git flow
+                stage('git-flow') {
+                    when {
+                        not {
+                            anyOf {
+                                expression { env.CURRENT_BRANCH == env.MASTER_GIT_BRANCH };
+                                expression { env.CURRENT_BRANCH == env.DEVELOP_GIT_BRANCH };
+                                expression { env.CURRENT_BRANCH == env.INTEGRATION_GIT_BRANCH };
+                                expression { env.CURRENT_BRANCH == env.VALID_GIT_BRANCH };
+
+                                expression { env.CURRENT_BRANCH ==~ env.FEATURE_GIT_BRANCH_GROOVY_EXPR };
+                                expression { env.CURRENT_BRANCH ==~ env.HOTFIX_GIT_BRANCH_GROOVY_EXPR };
+                                expression { env.CURRENT_BRANCH ==~ env.RELEASE_GIT_BRANCH_GROOVY_EXPR }
+                            }
+                        }
+                    }
+                    steps {
+                        script {
+                            mail to: "${env.MAIL_CHEF_PROJET}, ${env.MAIL_EQUIPE}",
+                                    from: 'Jenkins <>',
+                                    subject: "Erreur de nom de branche : ${env.gitlabSourceBranch} - ${currentBuild.projectName}${currentBuild.displayName}",
+                                    body: "Branche de nom incorrect ${env.gitlabSourceBranch}, elle ne sera pas compilée/testée : ${env.BUILD_URL}"
+                        }
+                        error("Branche de nom incorrect ${env.gitlabSourceBranch}")
+                    }
+                }
+                stage('version') {
+                    steps {
+                        script {
+                            pom = readMavenPom file: "pom.xml"
+                            VERSION = "${pom.properties['revision']}"
+                            if (env.CURRENT_BRANCH == env.INTEGRATION_GIT_BRANCH) {
+                                VERSION = "${pom.properties['revision']}-INTEGRATION"
+                            }
+                            echo "*** version ${VERSION}"
+                        }
+                    }
+                }
+                stage('package') {
+                    steps {
+                        // Build maven en utilisant les settings maven configurés dans jenkins
+                        configFileProvider([configFile(fileId: 'Global_Maven_Settings', variable: 'MAVEN_SETTINGS_XML')]) {
+                            sh 'mvn -T 4 --no-transfer-progress -s $MAVEN_SETTINGS_XML -DskipTests=true clean install'
+                        }
+                        stash includes: "**/target/*.${ARTIFACT_TYPE}", name: 'targetfolder'
+                    }
+                }
+                stage('test') {
+                    when { expression { return !params.SKIP_TEST } }
+                    steps {
+                        gitlabCommitStatus('test') {
+                            configFileProvider([configFile(fileId: 'Global_Maven_Settings', variable: 'MAVEN_SETTINGS_XML')]) {
+                                unstash 'targetfolder'
+                                sh 'mvn -s $MAVEN_SETTINGS_XML --show-version --no-transfer-progress verify surefire-report:report-only'
+                            }
+                        }
+                    }
+                }
+                stage('sonar') {
+                    steps {
+                        gitlabCommitStatus('sonar') {
+                            withSonarQubeEnv('Sonarqube HORS-COBOL') {
+                                withCredentials([string(credentialsId: 'SONAR_AUTH_TOKEN_ID', variable: 'TOKEN')]) {
+                                    configFileProvider([configFile(fileId: 'Global_Maven_Settings', variable: 'MAVEN_SETTINGS_XML')]) {
+                                        sh "sonar-scanner -Dsonar.java.binaries='target' -Dsonar.projectVersion=${VERSION} -Dsonar.projectName='${SONAR_PROJECT_NAME}' -Dsonar.projectKey=${SONAR_PROJECT_NAME} -Dsonar.branch.name=${CURRENT_BRANCH} -Dsonar.host.url=${SONAR_URL} -Dsonar.login=${SONAR_TOKEN}"
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+                stage('report') {
+                    when { expression { return !params.SKIP_TEST } }
+                    steps {
+                        gitlabCommitStatus('report') {
+                            publishHTML(target: [
+                                    allowMissing         : false,
+                                    alwaysLinkToLastBuild: true,
+                                    keepAll              : true,
+                                    reportDir            : "${PROJECT_NAME}-api-impl/target",
+                                    reportFiles          : 'cucumber-report.html',
+                                    reportName           : 'Cucumber',
+                                    reportTitles         : 'Cucumber'])
+                            publishHTML(target: [
+                                    allowMissing         : false,
+                                    alwaysLinkToLastBuild: true,
+                                    keepAll              : true,
+                                    reportDir            : "${PROJECT_NAME}-api-impl/target/site",
+                                    reportFiles          : 'surefire-report.html',
+                                    reportName           : 'JUnit',
+                                    reportTitles         : 'JUnit'])
+                        }
+                    }
+                }
+                // Cette étape permet de mettre le build en instable si des erreurs sonar sont détectées
+                stage('quality-gate') {
+                    steps {
+                        catchError(buildResult: 'SUCCESS', stageResult: 'UNSTABLE') { //Ne casse pas le build si qualityGate KO
+                            timeout(time: 2, unit: 'MINUTES') {
+                                waitForQualityGate abortPipeline: true
+                            }
+                        }
+                    }
+                }
+            }
+        }
+        stage('docker-image') {
+            when {
+                anyOf {
+                    expression { env.CURRENT_BRANCH == env.DEVELOP_GIT_BRANCH };
+                    expression { env.CURRENT_BRANCH == env.INTEGRATION_GIT_BRANCH };
+                }
+            }
+            steps {
+                script {
+                    unstash 'targetfolder'
+                    customImage = docker.build("${IMAGE_PUSH_NAME}:${VERSION}", "${IMAGE_BUILD_ARGS}.")
+                    docker.withRegistry("http://${HARBOR_REGISTRY}", 'HARBOR_ODS_ID') {
+                        customImage.push("${VERSION}")
+                        customImage.push("latest")
+                    }
+                }
+            }
+        }
+        stage("deploy-vm") {
+            when {
+                anyOf {
+                    expression { env.CURRENT_BRANCH == env.DEVELOP_GIT_BRANCH };
+                    expression { env.CURRENT_BRANCH == env.INTEGRATION_GIT_BRANCH };
+                }
+            }
+            steps {
+                script {
+                    CONFIG_SERVER_CONF = "-e SPRING_CLOUD_CONFIG_URI=${SPRING_CLOUD_CONFIG_URI}"
+                    if (env.CURRENT_BRANCH == env.DEVELOP_GIT_BRANCH) {
+                        DEPLOYMENT_DOCKER_HOST_PORT = "${DEPLOYMENT_PORT_DEV}"
+                        DOCKER_RUN_PARAMS = "${CONFIG_SERVER_CONF} -e SPRING_PROFILES_ACTIVE=dev-vm"
+                    } else {
+                        DEPLOYMENT_DOCKER_HOST_PORT = "${DEPLOYMENT_PORT_INTEGRATION}"
+                        DOCKER_RUN_PARAMS = "${CONFIG_SERVER_CONF} -e SPRING_PROFILES_ACTIVE=integration-vm"
+                    }
+                    sshagent(['SSH_KEY_MOTEUR_CALCUL_FABRIQUE_DIG']) {
+                        sh "ssh -o StrictHostKeyChecking=no ${DEPLOYMENT_SERVER_USER}@${DEPLOYMENT_SERVER} " +
+                                "docker stop ${DEPLOYMENT_CONTAINER_NAME} || true"
+                        sh "ssh -o StrictHostKeyChecking=no ${DEPLOYMENT_SERVER_USER}@${DEPLOYMENT_SERVER} " +
+                                "docker rm ${DEPLOYMENT_CONTAINER_NAME} || true"
+                        // le tag "--pull always" n'existe pas pour le docker run avec la version de docker installé sur la VM
+                        sh "ssh -o StrictHostKeyChecking=no ${DEPLOYMENT_SERVER_USER}@${DEPLOYMENT_SERVER} " +
+                                "docker rmi ${IMAGE_PUSH_NAME}:${VERSION} || true"
+                        sh "ssh -o StrictHostKeyChecking=no ${DEPLOYMENT_SERVER_USER}@${DEPLOYMENT_SERVER} " +
+                                "docker run -d " +
+                                "--name ${DEPLOYMENT_CONTAINER_NAME} ${DOCKER_RUN_PARAMS} " +
+                                "-p ${DEPLOYMENT_DOCKER_HOST_PORT}:8080 " +
+                                "--dns-search blabla " +
+                                "--dns 10.207.34.128 " +
+                                "--dns 10.207.34.155 " +
+                                "--dns 10.203.36.132 " +
+                                "--dns 10.207.31.83 " +
+                                "${IMAGE_PUSH_NAME}:${VERSION}"
+                    }
+                }
+            }
+        }
+    }
+    post {
+        success {
+            updateGitlabCommitStatus state: 'success'
+        }
+        failure {
+            updateGitlabCommitStatus state: 'failed'
+
+            script {
+                if (env.gitlabSourceBranch == env.DEVELOP_GIT_BRANCH ||
+                        env.gitlabSourceBranch == env.MASTER_GIT_BRANCH ||
+                        env.gitlabSourceBranch.split('/')[0] == 'release') {
+                    mail to: '',
+                            from: 'Jenkins <>',
+                            subject: "Build failed : ${currentBuild.projectName}${currentBuild.displayName}",
+                            body: "Build en erreur : ${env.BUILD_URL}"
+                }
+            }
+        }
+        cleanup {
+            deleteDir()
+        }
+    }
+}

@@ -1,0 +1,14 @@
+.idea/
+*.iml
+target/
+*.log
+.history
+
+/front/build/
+/front/.vscode/
+/front/node_modules/
+/front/package-lock.json
+/front/.history/
+
+
+

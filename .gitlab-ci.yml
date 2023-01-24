@@ -1,0 +1,21 @@
+image: maven:3-jdk-11
+
+stages:
+  - build
+  - test
+
+Building:
+  stage: build
+  script: "mvn clean package -DskipTests=true"
+
+Testing:
+  stage: test
+  artifacts:
+    when: always
+    paths:
+      - target/
+    expire_in: 24 hours
+    reports:
+      junit:
+        - api/target/surefire-reports/TEST-*.xml
+  script: "mvn test"  

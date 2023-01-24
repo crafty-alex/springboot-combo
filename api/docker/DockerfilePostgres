@@ -1,0 +1,11 @@
+FROM postgres:9.6
+
+VOLUME /var/lib/postgresql/data
+
+ENV POSTGRES_USER postgres
+ENV POSTGRES_PASSWORD postgres
+ENV POSTGRES_DB dicem
+
+COPY postgres/init.sql /docker-entrypoint-initdb.d/10-init.sql
+
+EXPOSE 5433

@@ -1,0 +1,20 @@
+server:
+  port: 7070
+
+eureka:
+  client:
+    serviceUrl:
+      defaultZone: http://localhost:8761/eureka
+
+spring:
+  application:
+    name: spring-cloud-eureka-feign-client
+  main:
+    allow-bean-definition-overriding: true
+
+
+feign:
+  retryer:
+    period: 100
+    duration: 1
+    maxattemps: 3
