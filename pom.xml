@@ -88,6 +88,7 @@
                 <artifactId>maven-enforcer-plugin</artifactId>
                 <version>3.0.0</version>
                 <executions>
+                         
                     <execution>
                         <id>no-duplicate-declared-dependencies</id>
                         <goals>
@@ -99,6 +100,26 @@
                             </rules>
                         </configuration>
                     </execution>
+                         
+                          <execution>
+            <id>enforce-banned-dependencies</id>
+            <goals>
+              <goal>enforce</goal>
+            </goals>
+            <configuration>
+              <rules>
+                <bannedDependencies>
+                  <excludes>
+                           <exclude>com.alex.example-1</exclude>
+                  </excludes>
+                  <includes>
+                    <include>com.alex.example-2</include>
+                  </includes>
+                </bannedDependencies>
+              </rules>
+            </configuration>
+          </execution>
+                         
                 </executions>
             </plugin>
 
