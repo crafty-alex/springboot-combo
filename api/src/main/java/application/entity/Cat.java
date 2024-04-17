@@ -26,6 +26,9 @@ public class Cat {
     @Column(name = "id", nullable = false)
     private Integer id;
 
+    @Version
+    private int version;
+
     @Column(name = "name", nullable = false)
     private String name;
 
