@@ -40,7 +40,7 @@ public class ControllerExceptionHandler {
     public ResponseEntity<Map<String, String>> handleInvalidFormatException(InvalidFormatException e) {
         Map<String, String> errors = new HashMap<>();
         String fieldName = e.getPath().stream()
-                .map(ref -> ref.getFieldName())
+               .map(JsonMappingException.Reference::getFieldName)
                 .findFirst()
                 .orElse("unknown");
         String errorMessage = "Invalid value: " + e.getValue();
