@@ -36,4 +36,16 @@ public class ControllerExceptionHandler {
         return new ResponseEntity<>(errors,  HttpStatus.BAD_REQUEST);
     }
 
+    /*@ExceptionHandler(InvalidFormatException.class)
+    public ResponseEntity<Map<String, String>> handleInvalidFormatException(InvalidFormatException e) {
+        Map<String, String> errors = new HashMap<>();
+        String fieldName = e.getPath().stream()
+                .map(ref -> ref.getFieldName())
+                .findFirst()
+                .orElse("unknown");
+        String errorMessage = "Invalid value: " + e.getValue();
+        errors.put(fieldName, errorMessage);
+        return new ResponseEntity<>(errors, HttpStatus.BAD_REQUEST);
+    }*/
+
 }
