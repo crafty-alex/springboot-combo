@@ -48,4 +48,23 @@ public class ControllerExceptionHandler {
         return new ResponseEntity<>(errors, HttpStatus.BAD_REQUEST);
     }*/
 
+   /* @ExceptionHandler(HttpMessageNotReadableException.class)
+    public ResponseEntity<Map<String, String>> handleHttpMessageNotReadableException(HttpMessageNotReadableException e) {
+        Map<String, String> errors = new HashMap<>();
+
+        Throwable mostSpecificCause = e.getMostSpecificCause();
+        if (mostSpecificCause instanceof InvalidFormatException) {
+            InvalidFormatException invalidFormatException = (InvalidFormatException) mostSpecificCause;
+            String fieldName = invalidFormatException.getPath().stream()
+                    .map(JsonMappingException.Reference::getFieldName)
+                    .findFirst()
+                    .orElse("unknown");
+            String errorMessage = "Invalid value for field: " + fieldName + ". Provided value: " + invalidFormatException.getValue();
+            errors.put(fieldName, errorMessage);
+        } else {
+            errors.put("error", "Invalid request payload");
+        }
+
+        return new ResponseEntity<>(errors, HttpStatus.BAD_REQUEST);
+    }*/
 }
