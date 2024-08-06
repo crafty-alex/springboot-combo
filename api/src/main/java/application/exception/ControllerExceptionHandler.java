@@ -67,4 +67,13 @@ public class ControllerExceptionHandler {
 
         return new ResponseEntity<>(errors, HttpStatus.BAD_REQUEST);
     }*/
+
+    /*  @ExceptionHandler({SavedSearchException.class})
+    public ResponseEntity<ErrorMsg> handleSavedSearchException(SavedSearchException e) {
+        String message = e.getCause() != null ? e.getLocalizedMessage() + " : " + e.getCause().getLocalizedMessage() :
+                e.getLocalizedMessage();
+        return new ResponseEntity<>(new ErrorMsg(HttpStatus.INTERNAL_SERVER_ERROR,
+                message),
+                HttpStatus.INTERNAL_SERVER_ERROR);
+    }*/
 }
